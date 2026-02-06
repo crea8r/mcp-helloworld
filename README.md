@@ -2,6 +2,8 @@
 
 A minimal FastAPI webserver that supports notes, tags, and a simple search endpoint. Uses SQLite for storage and keeps everything in a single file: `notes.db`.
 
+This repo is designed as a small, inspectable example for building agent-friendly services. For a high-level explanation of how an agent loop works, see the interactive: [Agent Loop Interactive](https://techexplain.netlify.app/interactives/agent-loop/).
+
 ## Quickstart
 
 ```bash
@@ -13,6 +15,12 @@ uvicorn app:app --reload
 ```
 
 Server will run at `http://127.0.0.1:8000`.
+
+## Purpose
+
+- Provide a tiny notes API with tags and search.
+- Expose an MCP server so agents can call typed tools.
+- Offer a simple example of intent-to-tool mapping for agent workflows.
 
 ## Data Model
 
@@ -163,6 +171,52 @@ python mcp_server.py --transport sse --host 127.0.0.1 --port 8001
 
 - `note://{note_id}`
 - `tags://list`
+
+## MCP Client Setup (Codex, Claude, etc.)
+
+Most MCP-capable clients let you add a server in one of two ways:
+
+1. **stdio (local command)**: the client launches the server process directly.
+2. **HTTP/SSE (remote URL)**: the client connects to a running MCP server.
+
+Use one of the transports below depending on what your client supports. Refer to your client’s MCP settings UI or docs for the exact config format.
+
+**stdio (local process)**
+
+```bash
+python mcp_server.py --transport stdio
+```
+
+**streamable HTTP (URL)**
+
+```bash
+python mcp_server.py --transport streamable-http --host 127.0.0.1 --port 8001 --path /mcp
+```
+
+Connect your client to:
+
+```text
+http://127.0.0.1:8001/mcp
+```
+
+**SSE (URL)**
+
+```bash
+python mcp_server.py --transport sse --host 127.0.0.1 --port 8001
+```
+
+Connect your client to:
+
+```text
+http://127.0.0.1:8001
+```
+
+## Example Skill File
+
+This repo includes an example `SKILL.md` that documents how an agent should use the Notes MCP tools. It is not installed into any global skill list.
+
+- Example skill: `SKILL.md`
+- Served at runtime: `GET /skill.md`
 
 ## Intent-to-Tool Mapping (How the Agent Chooses MCP Calls)
 

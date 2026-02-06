@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 import service
 
 app = FastAPI(title="Notes MCP Server", version="0.1.0")
+SKILL_PATH = Path(__file__).resolve().parent / "SKILL.md"
 
 
 class NoteCreate(BaseModel):
@@ -44,6 +47,13 @@ def _handle_service_error(exc: service.ServiceError) -> None:
 @app.get("/")
 def root() -> Dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/skill.md")
+def get_skill_md() -> FileResponse:
+    if not SKILL_PATH.exists():
+        raise HTTPException(status_code=404, detail="SKILL.md not found")
+    return FileResponse(SKILL_PATH, media_type="text/markdown")
 
 
 @app.post("/notes")
