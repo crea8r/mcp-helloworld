@@ -164,6 +164,43 @@ python mcp_server.py --transport sse --host 127.0.0.1 --port 8001
 - `note://{note_id}`
 - `tags://list`
 
+## Intent-to-Tool Mapping (How the Agent Chooses MCP Calls)
+
+When using the MCP tools via an agent, the agent first derives a structured intent from a natural language request, then maps that intent to the most specific MCP tool available.
+
+Example user request:
+
+```text
+I want to show notes that has the word "fox".
+```
+
+Structured intent (example):
+
+```json
+{
+  "actions": [
+    {
+      "type": "search_notes",
+      "query": "fox",
+      "purpose": "show notes containing word 'fox'"
+    }
+  ]
+}
+```
+
+Tool mapping:
+
+- Intent: `search_notes` -> MCP tool: `search_notes(query)`
+- Payload: `{ "query": "fox" }`
+
+Why `search_notes` is chosen:
+
+- The request asks for notes containing a word.
+- `list_notes()` has no filter.
+- `search_notes(query)` is the only tool that can filter by content.
+
+This same pattern applies to other requests (e.g., "create a note", "update note 1", "attach tags", "list tags").
+
 ## Notes
 
 - The database file `notes.db` will be created in the project root.
